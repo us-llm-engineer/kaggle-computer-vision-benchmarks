@@ -1,0 +1,7 @@
+{
+ "samples": 373,
+ "mean_percent": 97.7,
+ "median_percent": 100.0,
+ "share_ge_85_percent": 97.1,
+ "peak_memory_mib": 16658.0
+}
