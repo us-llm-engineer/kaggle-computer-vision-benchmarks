@@ -13,6 +13,8 @@ result tables, figures and a README with the method, the numbers and the caveats
 **Problem.** 5,950 labelled images from 0-800 m depth; the evaluation images (10,744) come from 0-1300 m. A model must rank the
 categories present in each image (MAP@20) and score how likely the image is out-of-sample (sAUC = 2 AUC - 1).
 
+**Baseline.** 0.664 at the current Leaderboard
+
 **What is in the data** (all from [`results/preprocess_meta.json`](fathomnet-2023-out-of-sample/results/preprocess_meta.json)):
 only 133 of the 290 categories have any labelled image, 157 have none; 63 of the 133 have at most five images; images carry 1.51 labels
 on average (70.7% have one); the most common category appears in 2,643 images.
