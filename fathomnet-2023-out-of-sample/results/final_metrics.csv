@@ -1,4 +1,4 @@
-methodology,best_epoch,val_MAP@20,val_sAUC_msp,val_sAUC_energy,val_sAUC_entropy,proxy_score,train_MAP@20,parameters,macro_AP_categories
-1 Classical features + ridge,-,0.6167,0.2486,0.1348,0.2868,0.4326,0.6683,closed form,0.1044
-2 Residual CNN (224x128),33,0.6113,0.1773,0.064,0.0932,0.3943,0.6447,2906690,0.1061
-3 Tile-MIL CNN (448x256),3,0.5631,0.2439,0.1517,-0.0796,0.4035,0.569,1314338,0.0473
+methodology,best_epoch,val_MAP@20,val_sAUC_msp,val_sAUC_energy,val_sAUC_entropy,proxy_score,train_MAP@20,parameters,macro_AP_categories,val_MAP@20_seen_recomputed,val_MAP@20_novel,val_MAP@20_all_images,score_all_images
+1 Classical features + ridge,-,0.6167,0.2486,0.1348,0.2868,0.4326,0.6683,closed form,0.1044,0.616,0.1331,0.4207,0.3347
+2 Residual CNN (224x128),33,0.6113,0.1773,0.064,0.0932,0.3943,0.6447,2906690,0.1061,0.6113,0.1288,0.4162,0.2967
+3 Tile-MIL CNN (448x256),3,0.5631,0.2439,0.1517,-0.0796,0.4035,0.569,1314338,0.0473,0.5631,0.1211,0.3843,0.3141

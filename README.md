@@ -36,6 +36,19 @@ novel validation images; sAUC uses 1 - max probability):
 | 2 Residual CNN, 224x128 | 0.6113 | 0.1773 | 0.0640 | 0.0932 | 0.1061 | 2.91 M |
 | 3 Tile-MIL CNN, 448x256 | 0.5631 | 0.2439 | 0.1517 | -0.0796 | 0.0473 | 1.31 M |
 
+**Correction (added after the out-of-sample round).** `proxy_score` in `results/final_metrics.csv` (0.4326 / 0.3943 / 0.4035) is
+`0.5 (sAUC + MAP@20)` with MAP@20 taken on **seen images only**, so it overstates the competition score, which averages MAP@20 over every
+image. Recomputed from the saved validation logits over all 1,360 validation images (seen and novel) the score is:
+
+| Methodology | MAP@20 seen | MAP@20 novel | MAP@20 all images | sAUC (max-prob) | Score `0.5 (sAUC + MAP@20)` | Old `proxy_score` |
+|---|---|---|---|---|---|---|
+| 1 Classical features + ridge | 0.6160 | 0.1331 | 0.4207 | 0.2486 | **0.3347** | 0.4326 |
+| 2 Residual CNN | 0.6113 | 0.1288 | 0.4162 | 0.1773 | **0.2967** | 0.3943 |
+| 3 Tile-MIL CNN | 0.5631 | 0.1211 | 0.3843 | 0.2439 | **0.3141** | 0.4035 |
+
+The seen-image MAP of the first model recomputes to 0.6160 (0.6167 was recorded). The new columns are in the CSV; the figure script of
+this round does not produce them.
+
 **Read this honestly.**
 - The simplest model is competitive: on 4,590 training images with a very long tail, learned features add little to hand-crafted ones.
 - Out-of-sample detection is weak for every method (best sAUC 0.29), and per-category average precision is about 0.10: most of the 133

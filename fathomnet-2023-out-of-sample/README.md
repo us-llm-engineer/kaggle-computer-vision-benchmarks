@@ -83,6 +83,10 @@ What the in-training statistics add (figures in the repository README):
   novel images (CNN), 0.569 and 0.548 (MIL) (Fig. 1e-f, 3).
 - Grad-CAM attention is broad and central rather than on the animals (Fig. 5).
 
+**Correction.** The `proxy_score` column (0.4326 / 0.3943 / 0.4035) uses MAP@20 on seen images only. With MAP@20 over all validation images
+the competition-style score is 0.3347 / 0.2967 / 0.3141 (columns `val_MAP@20_all_images` and `score_all_images` in
+`results/final_metrics.csv`; derivation in section 11.1).
+
 ## 6. Per-epoch statistics collected during training (`train_cnn.py`)
 
 Rewritten atomically each epoch to `<name>_history.json` ([`results/history/`](results/history/)): train and validation loss,
