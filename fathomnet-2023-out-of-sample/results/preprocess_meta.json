@@ -1,0 +1,71 @@
+{
+ "n_train_images": 5950,
+ "n_eval_images": 10744,
+ "size_big": [
+  256,
+  448
+ ],
+ "size_small": [
+  128,
+  224
+ ],
+ "channel_mean": [
+  0.2964041350174669,
+  0.3849482553225196,
+  0.35383310200441814
+ ],
+ "channel_std": [
+  0.15481337125658162,
+  0.14842001079670006,
+  0.1342791948311453
+ ],
+ "classes_with_any_label": 133,
+ "classes_never_seen": 157,
+ "labels_per_image": {
+  "mean": 1.5127731092436976,
+  "max": 10,
+  "share_single_label": 0.7073949579831933
+ },
+ "most_common_class": {
+  "category": 160,
+  "images": 2643
+ },
+ "classes_with_at_most_5_images": 63,
+ "brightness_quantiles_0_25_50_75_100": [
+  9.0,
+  66.7,
+  85.3,
+  108.2,
+  197.7
+ ],
+ "split": {
+  "train": 4590,
+  "val_in": 810,
+  "val_novel": 550
+ },
+ "novel_classes": [
+  16,
+  120,
+  133,
+  203,
+  242,
+  260
+ ],
+ "novel_class_image_counts": [
+  53,
+  111,
+  136,
+  75,
+  56,
+  137
+ ],
+ "validation_report": {
+  "decode_errors": {
+   "train": 0,
+   "eval": 0
+  },
+  "train_images_without_labels": 0,
+  "labels_without_images": 0
+ },
+ "seconds": 63.8
+}
