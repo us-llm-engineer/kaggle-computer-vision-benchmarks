@@ -1,0 +1,90 @@
+== epochs trained / evaluations: {'v0': (44, 14), 'v1': (39, 13), 'v2': (41, 13), 'v3': (9, 3)}
+
+== CHOOSE trajectory (every evaluation): epoch pq sq rq dice tp fp fn split merge pred/gt
+v0
+  ep  3 pq 0.100 sq 0.507 rq 0.170 dice 0.502 tp   33 fp  307 fn   97 split  26 merge   4 pred/gt 340/130
+  ep  6 pq 0.119 sq 0.594 rq 0.202 dice 0.520 tp   48 fp  528 fn   82 split  21 merge   7 pred/gt 576/130
+  ep  9 pq 0.091 sq 0.502 rq 0.149 dice 0.515 tp   29 fp  266 fn  101 split  15 merge   8 pred/gt 295/130
+  ep 12 pq 0.053 sq 0.640 rq 0.082 dice 0.271 tp   65 fp 2085 fn   65 split  29 merge   6 pred/gt 2150/130
+  ep 15 pq 0.215 sq 0.634 rq 0.338 dice 0.571 tp   80 fp  319 fn   50 split  16 merge   7 pred/gt 399/130
+  ep 18 pq 0.263 sq 0.674 rq 0.386 dice 0.626 tp   84 fp  295 fn   46 split  23 merge   3 pred/gt 379/130
+  ep 21 pq 0.251 sq 0.648 rq 0.389 dice 0.604 tp   87 fp  241 fn   43 split  18 merge   5 pred/gt 328/130
+  ep 24 pq 0.322 sq 0.649 rq 0.495 dice 0.627 tp   89 fp  155 fn   41 split  17 merge   5 pred/gt 244/130
+  ep 27 pq 0.304 sq 0.615 rq 0.462 dice 0.634 tp   86 fp  145 fn   44 split  14 merge   6 pred/gt 231/130
+  ep 30 pq 0.301 sq 0.652 rq 0.463 dice 0.633 tp   88 fp  193 fn   42 split  17 merge   8 pred/gt 281/130
+  ep 33 pq 0.219 sq 0.652 rq 0.338 dice 0.583 tp   80 fp  279 fn   50 split  13 merge   7 pred/gt 359/130
+  ep 36 pq 0.265 sq 0.641 rq 0.411 dice 0.609 tp   81 fp  230 fn   49 split  15 merge   7 pred/gt 311/130
+  ep 39 pq 0.298 sq 0.663 rq 0.443 dice 0.626 tp   82 fp  172 fn   48 split  16 merge   6 pred/gt 254/130
+  ep 42 pq 0.349 sq 0.663 rq 0.524 dice 0.643 tp   86 fp  119 fn   44 split  16 merge   3 pred/gt 205/130
+  ep 42 pq 0.349 sq 0.663 rq 0.524 dice 0.643 tp   86 fp  119 fn   44 split  16 merge   3 pred/gt 205/130
+v1
+  ep  3 pq 0.107 sq 0.562 rq 0.187 dice 0.508 tp   49 fp  524 fn   81 split  36 merge   3 pred/gt 573/130
+  ep  6 pq 0.090 sq 0.563 rq 0.155 dice 0.479 tp   36 fp  426 fn   94 split  16 merge   7 pred/gt 462/130
+  ep  9 pq 0.043 sq 0.318 rq 0.076 dice 0.445 tp   16 fp  291 fn  114 split  11 merge   9 pred/gt 307/130
+  ep 12 pq 0.101 sq 0.582 rq 0.174 dice 0.446 tp   53 fp  464 fn   77 split  18 merge   5 pred/gt 517/130
+  ep 15 pq 0.144 sq 0.535 rq 0.249 dice 0.510 tp   45 fp  254 fn   85 split  11 merge   8 pred/gt 299/130
+  ep 18 pq 0.231 sq 0.601 rq 0.380 dice 0.579 tp   71 fp  202 fn   59 split  15 merge   8 pred/gt 273/130
+  ep 21 pq 0.179 sq 0.548 rq 0.305 dice 0.546 tp   51 fp  211 fn   79 split  11 merge   9 pred/gt 262/130
+  ep 24 pq 0.216 sq 0.592 rq 0.362 dice 0.556 tp   64 fp  188 fn   66 split  10 merge   7 pred/gt 252/130
+  ep 27 pq 0.200 sq 0.554 rq 0.334 dice 0.565 tp   61 fp  176 fn   69 split   9 merge   8 pred/gt 237/130
+  ep 30 pq 0.202 sq 0.597 rq 0.334 dice 0.566 tp   61 fp  207 fn   69 split  10 merge  10 pred/gt 268/130
+  ep 33 pq 0.088 sq 0.540 rq 0.152 dice 0.463 tp   38 fp  364 fn   92 split  10 merge  11 pred/gt 402/130
+  ep 36 pq 0.219 sq 0.607 rq 0.354 dice 0.580 tp   63 fp  180 fn   67 split  12 merge   8 pred/gt 243/130
+  ep 39 pq 0.292 sq 0.634 rq 0.458 dice 0.622 tp   83 fp  179 fn   47 split  16 merge   6 pred/gt 262/130
+  ep 39 pq 0.292 sq 0.634 rq 0.458 dice 0.622 tp   83 fp  179 fn   47 split  16 merge   6 pred/gt 262/130
+v2
+  ep  3 pq 0.082 sq 0.553 rq 0.130 dice 0.485 tp   52 fp  654 fn   78 split  48 merge   1 pred/gt 706/130
+  ep  6 pq 0.125 sq 0.595 rq 0.206 dice 0.509 tp   58 fp  497 fn   72 split  32 merge   4 pred/gt 555/130
+  ep  9 pq 0.154 sq 0.557 rq 0.256 dice 0.530 tp   60 fp  350 fn   70 split  22 merge   4 pred/gt 410/130
+  ep 12 pq 0.098 sq 0.616 rq 0.160 dice 0.457 tp   69 fp  889 fn   61 split  32 merge   4 pred/gt 958/130
+  ep 15 pq 0.202 sq 0.655 rq 0.308 dice 0.569 tp   80 fp  354 fn   50 split  27 merge   3 pred/gt 434/130
+  ep 18 pq 0.286 sq 0.677 rq 0.421 dice 0.628 tp   80 fp  178 fn   50 split  28 merge   3 pred/gt 258/130
+  ep 21 pq 0.268 sq 0.674 rq 0.396 dice 0.618 tp   84 fp  226 fn   46 split  30 merge   3 pred/gt 310/130
+  ep 24 pq 0.283 sq 0.682 rq 0.415 dice 0.630 tp   80 fp  186 fn   50 split  25 merge   3 pred/gt 266/130
+  ep 27 pq 0.331 sq 0.682 rq 0.486 dice 0.636 tp   81 fp  132 fn   49 split  17 merge   5 pred/gt 213/130
+  ep 30 pq 0.313 sq 0.677 rq 0.461 dice 0.638 tp   91 fp  180 fn   39 split  22 merge   5 pred/gt 271/130
+  ep 33 pq 0.258 sq 0.663 rq 0.391 dice 0.613 tp   87 fp  226 fn   43 split  21 merge   4 pred/gt 313/130
+  ep 36 pq 0.254 sq 0.661 rq 0.385 dice 0.610 tp   82 fp  229 fn   48 split  23 merge   7 pred/gt 311/130
+  ep 39 pq 0.296 sq 0.676 rq 0.438 dice 0.621 tp   85 fp  184 fn   45 split  24 merge   3 pred/gt 269/130
+  ep 39 pq 0.296 sq 0.676 rq 0.438 dice 0.621 tp   85 fp  184 fn   45 split  24 merge   3 pred/gt 269/130
+v3
+  ep  3 pq 0.283 sq 0.680 rq 0.414 dice 0.559 tp   77 fp  180 fn   26 split  11 merge   2 pred/gt 257/103
+  ep  6 pq 0.336 sq 0.685 rq 0.491 dice 0.605 tp   77 fp  135 fn   26 split  12 merge   2 pred/gt 212/103
+  ep  9 pq 0.329 sq 0.686 rq 0.479 dice 0.589 tp   78 fp  140 fn   25 split   9 merge   2 pred/gt 218/103
+  ep  9 pq 0.329 sq 0.686 rq 0.479 dice 0.589 tp   78 fp  140 fn   25 split   9 merge   2 pred/gt 218/103
+
+== train vs CHOOSE Dice gap, loss slope over the last 10 epochs, lr
+v0: epochs 44 train_dice 0.699 gap None loss first-to-last of last 10 0.466->0.398 lr 6.2e-05
+v1: epochs 39 train_dice 0.651 gap 0.029 loss first-to-last of last 10 0.639->0.518 lr 8.4e-05
+v2: epochs 41 train_dice 0.690 gap None loss first-to-last of last 10 0.445->0.393 lr 7.6e-05
+v3: epochs 9 train_dice 0.667 gap 0.078 loss first-to-last of last 10 21.967->17.853 lr 5.0e-06
+
+== recall by instance size (last evaluation with the table): bins <300, 300-1000, 1000-3000, >=3000
+v0 [(0, None), (43, 0.6), (63, 0.73), (24, 0.58)]
+v1 [(0, None), (43, 0.56), (63, 0.73), (24, 0.54)]
+v2 [(0, None), (43, 0.67), (63, 0.68), (24, 0.54)]
+v3 [(0, None), (36, 0.69), (49, 0.82), (18, 0.72)]
+
+== PQ vs threshold (last evaluation having it) and score separation
+v0 {'0.5': 0.298, '0.3': 0.295, '0.7': 0.305} p_in 0.708 p_out 0.0048 p99_out 0.007
+v1 {'0.5': 0.292, '0.3': 0.264, '0.7': 0.307} p_in 0.734 p_out 0.0151 p99_out 0.015
+v2 {'0.5': 0.296, '0.3': 0.285, '0.7': 0.301} p_in 0.702 p_out 0.0034 p99_out 0.004
+v3 {'0.5': 0.329, '0.3': 0.291, '0.7': 0.324} p_in 0.723 p_out 0.0047 p99_out 0.087
+
+== gradient norm / update ratio by group (mean over the last 5 epochs)
+v0 {'enc': '6.73e-01', 'bott': '1.21e-01', 'dec': '4.17e-01', 'head': '2.20e-01'} | upd {'enc': '1.8e-06', 'bott': '3.0e-07', 'dec': '9.7e-07', 'head': '8.8e-06'}
+v1 {'enc': '5.01e-01', 'bott': '7.89e-02', 'dec': '4.10e-01', 'head': '3.83e-01'} | upd {'enc': '1.7e-06', 'bott': '2.5e-07', 'dec': '1.2e-06', 'head': '2.3e-05'}
+v2 {'enc': '6.73e-01', 'bott': '1.43e-01', 'attn': '5.27e-02', 'dec': '3.92e-01', 'head': '1.75e-01'} | upd {'enc': '2.2e-06', 'bott': '4.2e-07', 'attn': '1.2e-07', 'dec': '1.1e-06', 'head': '7.7e-06'}
+v3 {'encoder': '8.98e-01', 'pixel_decoder': '3.86e-01', 'transformer': '1.85e-01', 'heads': '6.29e-02'} | upd {'encoder': '2.6e-08', 'pixel_decoder': '3.8e-08', 'transformer': '7.2e-09', 'heads': '1.2e-06'}
+
+== per-record PQ at the best checkpoint (monitoring subset)
+v0: n 16 mean 0.349 median 0.325 share==0 0.00 share>0.5 0.06 min 0.22 max 0.56
+v1: n 16 mean 0.292 median 0.265 share==0 0.00 share>0.5 0.06 min 0.13 max 0.50
+v2: n 16 mean 0.313 median 0.310 share==0 0.00 share>0.5 0.00 min 0.16 max 0.47
+v3: n 12 mean 0.329 median 0.339 share==0 0.00 share>0.5 0.00 min 0.16 max 0.46
+
+== throughput and time per epoch (median), peak memory
+v0 median 24s/epoch total 16.5 min, peak mem 3.1 GiB
+v1 median 34s/epoch total 20.1 min, peak mem 3.1 GiB
+v2 median 25s/epoch total 17.0 min, peak mem 3.2 GiB
+v3 median 89s/epoch total 26.5 min, peak mem 8.6 GiB

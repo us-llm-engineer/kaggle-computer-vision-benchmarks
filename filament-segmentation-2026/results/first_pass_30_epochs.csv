@@ -1,0 +1,5 @@
+run,variant,seed,epochs_trained,best_epoch,best_smoothed_choose_pq,choose_pq,choose_sq,choose_rq,choose_dice,pred_instances,gt_instances,tp,fp,fn,gt_split,pred_merge,monitoring_records,parameters
+v0_s0,v0,0,30,30,0.2952,0.3006,0.652,0.4632,0.6325,281,130,88,193,42,17,8,16,1942289
+v1_s0,v1,0,30,30,0.2,0.2019,0.5974,0.334,0.5659,268,130,61,207,69,10,10,16,1942289
+v2_s0,v2,0,30,30,0.3051,0.3127,0.6769,0.4611,0.6379,271,130,91,180,39,22,5,16,2470171
+v3_s0,v3,0,9,9,0.3193,0.3295,0.6861,0.4792,0.5889,218,103,78,140,25,9,2,12,47402876
