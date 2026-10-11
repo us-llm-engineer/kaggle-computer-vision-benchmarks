@@ -1,0 +1,22 @@
+{
+ "file": "submission_ens_v0_r34e.csv",
+ "rows": 1257,
+ "images_with_rows": 176,
+ "models": [
+  "v0_s0",
+  "v0_s1",
+  "v0_s2",
+  "r34e_s0 (snapshot at epoch 51)"
+ ],
+ "averaging": "mean probability, no TTA",
+ "instance_params": {
+  "hi": 0.4,
+  "lo": 0.2,
+  "min_conf": 0.8,
+  "min_area": 200,
+  "close_radius": 0
+ },
+ "selection": "highest of 8 candidates on 80 CHOOSE records with one fixed setting",
+ "choose_pq_80": 0.4273,
+ "report_read": false
+}
