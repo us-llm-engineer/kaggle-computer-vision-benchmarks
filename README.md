@@ -1,12 +1,14 @@
 # Kaggle computer-vision benchmarks
 
-Worked, reproducible solutions to Kaggle computer-vision competitions, trained **from scratch** (no pre-trained weights) and
-evaluated with the competition's own metric where it can be computed offline. Each folder is self-contained: code, unit tests,
+Worked, reproducible solutions to Kaggle computer-vision competitions, trained **from scratch** (no pre-trained weights; the single
+exception is one pre-trained model in the filament folder, marked as such) and evaluated with the competition's own metric where it can
+be computed offline. Each folder is self-contained: code, unit tests,
 result tables, figures and a README with the method, the numbers and the caveats.
 
 | Folder | Competition | Task | Metric |
 |---|---|---|---|
 | [`fathomnet-2023-out-of-sample/`](fathomnet-2023-out-of-sample/) | [FathomNet 2023 (FGVC10)](https://www.kaggle.com/competitions/fathomnet-out-of-sample-detection) | Multi-label recognition of 290 deep-sea animal categories and detection of images from a different depth range | mean of sAUC (out-of-sample detection) and MAP@20 |
+| [`filament-segmentation-2026/`](filament-segmentation-2026/) | [Filament segmentation 2026](https://www.kaggle.com/competitions/filament-segmentation-2026) | Instance segmentation of thin solar filaments in 2048 x 2048 H-alpha images | Panoptic Quality |
 
 ## FathomNet 2023 in one page
 
@@ -126,6 +128,53 @@ Six result figures and three that read the statistics collected every epoch. Eac
 <tr><td colspan="2" align="center"><img src="fathomnet-2023-out-of-sample/figures_oos/fig9_training_dynamics.png" alt="Figure O9"><br><sub><b>Fig. 9</b> (in training) Loss, smoothed selection criterion, learning rate with plateau cuts, gradient norm per layer group, ID-validation MAP (solid) against a training subset (dotted) and throughput. <i>Source: results/oos/history/*_history.json</i></sub></td></tr>
 </table>
 
+## Filament segmentation 2026
+
+**Problem.** 707 labelled and 180 test images of the Sun in the H-alpha line (2048 x 2048, JPEG), with polygons of dark elongated
+filaments by up to three annotators per image; one predicted instance per filament, scored by Panoptic Quality
+(PQ = SQ x RQ at IoU > 0.5). Two annotators of one image agree with each other at a median PQ of only **0.36** (90th percentile 0.58).
+
+**Four approaches** on one pre-processing stage, one grouped split and one scoring path: a small U-Net trained from scratch (V0), the
+same with a soft-skeleton topology loss (V1), the same with edge-guided bottleneck attention (V2), and a fine-tuned pre-trained
+Mask2Former (V3). Details, tests and caveats in [`filament-segmentation-2026/README.md`](filament-segmentation-2026/README.md).
+
+| Variant | Runs | Best smoothed PQ per seed | PQ / SQ / RQ at the best checkpoint |
+|---|---|---|---|
+| V0 U-Net (control) | 3 seeds, 60 epochs | 0.334 / 0.359 / 0.345 | 0.351 / 0.665 / 0.516 |
+| V1 + soft-clDice | 1 seed, 52 epochs | 0.312 | 0.321 / 0.651 / 0.492 |
+| V2 + edge-guided attention | 3 seeds, 58 to 60 epochs | 0.346 / 0.342 / 0.342 | 0.350 / 0.681 / 0.512 |
+| V3 pre-trained Mask2Former | 1 seed, 9 epochs | 0.319 | 0.329 / 0.686 / 0.479 |
+
+[`run_summary.csv`](filament-segmentation-2026/results/run_summary.csv): best checkpoint of each run on a fixed 12 to 16 image CHOOSE
+monitoring subset.
+
+**Read this honestly.**
+- **These are monitoring-subset numbers, not held-out scores.** The REPORT split (106 images) was not scored, instance parameters were
+  not tuned, and no platform score was obtained.
+- V0 and V2 are indistinguishable; the limit is recognition quality (RQ about 0.5): each true filament comes with about one extra
+  predicted instance and 0.14 are split in pieces.
+- The platform's pages disagree on whether the scoreboard shows PQ or mean Dice, so the metric shown there is unresolved.
+- A first 30-epoch pass (best smoothed PQ 0.20 to 0.31) is kept in the folder as
+  [`first_pass_30_epochs.csv`](filament-segmentation-2026/results/first_pass_30_epochs.csv) with its analysis.
+
+### Visualizations (filament case)
+
+Six figures read the statistics collected every epoch; five interpret the final metrics. Each caption names the file it comes from.
+
+<table>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig1_training_dynamics.png" alt="Filament Fig. 1"><br><sub><b>Fig. 1</b> (in training) Loss, training and monitoring Dice, and the generalisation gap per variant. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig2_pq_and_final.png" alt="Filament Fig. 2"><br><sub><b>Fig. 2</b> (in training) Monitoring PQ per epoch with the smoothed selection criterion, and SQ, RQ and PQ at each run's best checkpoint against the human-vs-human median. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig3_instance_diagnostics.png" alt="Filament Fig. 3"><br><sub><b>Fig. 3</b> (in training) Predicted over true instance count, false positives and negatives, split and merged instances per epoch. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig4_optimisation_health.png" alt="Filament Fig. 4"><br><sub><b>Fig. 4</b> (in training) Gradient norm and update-to-weight ratio by layer group, and the learning rate. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig5_failure_anatomy.png" alt="Filament Fig. 5"><br><sub><b>Fig. 5</b> (in training) Recall by instance size, PQ against threshold, and the probability inside and outside the ground truth. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/fig6_qualitative.png" alt="Filament Fig. 6"><br><sub><b>Fig. 6</b> (in training) Input, ground truth, probability and matched or unmatched instances on fixed CHOOSE crops. <i>Source: results/runs/*_s0/examples.npz.</i></sub></td></tr>
+<tr><td width="50%"><img src="filament-segmentation-2026/figures/post1_final_pq_and_ceiling.png" alt="Filament Post 1"><br><sub><b>Post 1</b> Best smoothed PQ of every run against the agreement between two annotators. <i>Source: results/run_summary.csv, results/data_investigation.json.</i></sub></td>
+<td width="50%"><img src="filament-segmentation-2026/figures/post5_recall_by_size.png" alt="Filament Post 5"><br><sub><b>Post 5</b> Recall of true instances by area, with the instance count per bin. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/post2_pq_decomposition.png" alt="Filament Post 2"><br><sub><b>Post 2</b> PQ = SQ x RQ at the best checkpoint of each run, against the human-vs-human medians. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/post3_per_record_pq.png" alt="Filament Post 3"><br><sub><b>Post 3</b> Per-image PQ on the 12 monitoring images shared by all runs, with the human-vs-human percentiles. <i>Source: results/runs/*/best_extra.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/post4_instance_error_anatomy.png" alt="Filament Post 4"><br><sub><b>Post 4</b> Matched, extra and missed instances, splits and merges per true instance at the best checkpoint. <i>Source: results/runs/*/history.json.</i></sub></td></tr>
+</table>
+
 ## Reproduce
 
 Needs Python 3.10+, PyTorch with torchvision, scikit-learn, seaborn, a Kaggle account that accepted the competition rules and the
@@ -141,7 +190,7 @@ python3 train_classical.py && python3 train_cnn.py cnn --epochs 40 --batch 128 &
 python3 make_figures.py                              # tables and the nine figures
 ```
 
-The out-of-sample round (section above) is reproduced by the commands in section 11.7 of the folder README. Details, design decisions and the file map are in [`fathomnet-2023-out-of-sample/README.md`](fathomnet-2023-out-of-sample/README.md).
+The out-of-sample round (section above) is reproduced by the commands in section 11.7 of the folder README; the filament folder lists its own commands in section 11 of its README. Details, design decisions and the file map are in [`fathomnet-2023-out-of-sample/README.md`](fathomnet-2023-out-of-sample/README.md).
 
 ## Data and licence
 
@@ -149,7 +198,11 @@ The images are **not** redistributed here: they are licensed CC BY-NC-ND 4.0 by 
 passing the data to non-participants. `fetch_images.py` downloads them from the URLs in the competition annotation files. Please
 acknowledge [FathomNet](https://fathomnet.org) and the [Monterey Bay Aquarium Research Institute](https://www.mbari.org).
 
-## Candidate next experiments
+The filament images are likewise **not** redistributed: download them from the competition page after accepting its rules
+(`kaggle competitions download -c filament-segmentation-2026`). Please acknowledge the MAGFiLO annotation dataset (Ahmadzadeh et al.,
+2024) and the GONG network of the National Solar Observatory, whose observations it uses.
+
+## FathomNet 2023: candidate next experiments
 
 Following the out-of-sample round, still **untested** here: category-grouped cross-fitting for the combiner, a higher epoch cap for the evidential head (it was still improving), and a novelty-aware checkpoint criterion. From the first attempt:
 
@@ -174,3 +227,9 @@ Following the out-of-sample round, still **untested** here: category-grouped cro
 - Hogeweg, L. et al. *COOD: Combined out-of-distribution detection using multiple measures for anomaly and novel class detection in large-scale hierarchical classification.* 2024.
 - Anudeep, A. S., Sundaresan, V. *MARVEL: Margin-Aware Robust von Mises-Fischer Expert Learning for Long-Tailed Out-of-Distribution Detection.* 2026.
 - FGVC10 workshop, CVPR 2023: FathomNet 2023 competition, MBARI.
+- Solomon, V., Martens, P., Liu, J., Angryk, R. *EdgeAttNet: Towards Barb-Aware Filament Segmentation.* arXiv:2509.02964, 2025.
+- Shit, S. et al. *clDice: a Novel Topology-Preserving Loss Function for Tubular Structure Segmentation.* CVPR 2021.
+- Cheng, B., Misra, I., Schwing, A., Kirillov, A., Girdhar, R. *Masked-attention Mask Transformer for Universal Image Segmentation.* CVPR 2022.
+- Ronneberger, O., Fischer, P., Brox, T. *U-Net: Convolutional Networks for Biomedical Image Segmentation.* MICCAI 2015.
+- Kirillov, A., He, K., Girshick, R., Rother, C., Dollar, P. *Panoptic Segmentation.* CVPR 2019.
+- Ahmadzadeh, A. et al. *A dataset of manually annotated filaments from H-alpha observations.* Scientific Data, 2024.
