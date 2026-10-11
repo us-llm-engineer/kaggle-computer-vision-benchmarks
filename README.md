@@ -1,8 +1,8 @@
 # Kaggle computer-vision benchmarks
 
-Worked, reproducible solutions to Kaggle computer-vision competitions, trained **from scratch** (no pre-trained weights; the single
-exception is one pre-trained model in the filament folder, marked as such) and evaluated with the competition's own metric where it can
-be computed offline. Each folder is self-contained: code, unit tests,
+Worked, reproducible solutions to Kaggle computer-vision competitions, trained **from scratch** (no pre-trained weights; the
+exceptions are in the filament folder and marked as such: one pre-trained Mask2Former and, in its second round, ImageNet ResNet34
+encoders) and evaluated with the competition's own metric where it can be computed offline. Each folder is self-contained: code, unit tests,
 result tables, figures and a README with the method, the numbers and the caveats.
 
 | Folder | Competition | Task | Metric |
@@ -149,15 +149,61 @@ Mask2Former (V3). Details, tests and caveats in [`filament-segmentation-2026/REA
 monitoring subset.
 
 **Read this honestly.**
-- **These are monitoring-subset numbers, not held-out scores.** The REPORT split (106 images) was not scored, instance parameters were
-  not tuned, and no platform score was obtained.
+- **These are monitoring-subset numbers, not held-out scores.** The REPORT split (106 images) was not scored and instance parameters were
+  not tuned; the first round made no submission (the second round below did).
 - V0 and V2 are indistinguishable; the limit is recognition quality (RQ about 0.5): each true filament comes with about one extra
   predicted instance and 0.14 are split in pieces.
 - The platform's pages disagree on whether the scoreboard shows PQ or mean Dice, so the metric shown there is unresolved.
 - A first 30-epoch pass (best smoothed PQ 0.20 to 0.31) is kept in the folder as
   [`first_pass_30_epochs.csv`](filament-segmentation-2026/results/first_pass_30_epochs.csv) with its analysis.
 
-### Visualizations (filament case)
+### Second round: pre-trained encoders, ensembles and public scores
+
+Three U-Nets with an ImageNet ResNet34 encoder (plain `r34`, with edge attention `r34e`, trained on the annotator consensus `r34c`),
+hysteresis instance recovery with a confidence filter, and averaging of probability maps across runs. Candidates were compared on 80
+CHOOSE records with one fixed instance setting, and two were submitted
+([details](filament-segmentation-2026/README.md#12-second-round-pre-trained-encoders-ensembles-and-two-platform-scores)).
+
+| Submission | CHOOSE PQ (80 records) | SQ / RQ | **Public score** |
+|---|---|---|---|
+| V0 x3 (first round) + `r34e_s0`, maps averaged | 0.427 | 0.665 / 0.632 | **0.33** |
+| `r34_s0` best checkpoint alone | 0.385 | 0.675 / 0.565 | **0.31** |
+
+<p align="center"><img src="filament-segmentation-2026/figures/loop2/kaggle_public_scores.png" alt="Public scores of the two filament submissions" width="70%"></p>
+
+[`loop2_candidates.csv`](filament-segmentation-2026/results/loop2/loop2_candidates.csv),
+[`loop2_runs.csv`](filament-segmentation-2026/results/loop2/loop2_runs.csv).
+
+**Read this honestly.**
+- **The 0.55 target was not reached**; the best public score is 0.33.
+- Averaging models is the only clear gain (+0.03 to +0.05 PQ on CHOOSE, mostly by halving false positives); the single models are
+  within 0.01 of each other on 80 records.
+- Both submissions score 0.08 to 0.10 lower on the public set than on CHOOSE; the candidate was the best of eight on those 80 records,
+  so part of the gap is selection optimism (untested).
+- **Limitation: small-scale training on one L4.** Every run shared one 24 GB L4 with up to five other jobs (peak 22.0 of 22.5 GiB):
+  ResNet34 at 512 x 512 crops and batch 8 was the largest model trained, there was one seed per compared variant, 80 epochs took about
+  1.4 hours per run, Mask2Former got only 11 epochs in total, and instance parameters were fixed rather than searched. Whether more
+  compute would close the gap is untested; annotator agreement (median PQ 0.36) also bounds the score.
+
+### Visualizations (filament case, second round)
+
+Six figures read the statistics collected every epoch; five interpret the candidate and submission results. Each caption names its source.
+
+<table>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig1_training_dynamics.png" alt="Filament round 2 Fig. 1"><br><sub><b>Fig. 1</b> (in training) Loss, training Dice against CHOOSE Dice, and the generalisation gap of the four new variants. <i>Source: results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig2_pq_and_final.png" alt="Filament round 2 Fig. 2"><br><sub><b>Fig. 2</b> (in training) Monitoring PQ per evaluation with the smoothed criterion and best epoch, and PQ / SQ / RQ at each run's best checkpoint. <i>Source: results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig3_instance_diagnostics.png" alt="Filament round 2 Fig. 3"><br><sub><b>Fig. 3</b> (in training) Predicted over true instance count, false positives and negatives, splits and merges per evaluation. <i>Source: results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig4_optimisation_health.png" alt="Filament round 2 Fig. 4"><br><sub><b>Fig. 4</b> (in training) Gradient norm and update-to-weight ratio by layer group, and the learning rate with its two warm restarts. <i>Source: results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig5_failure_anatomy.png" alt="Filament round 2 Fig. 5"><br><sub><b>Fig. 5</b> (in training) Recall by instance size, PQ against threshold, and the probability inside and outside the ground truth. <i>Source: results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/fig6_l4_efficiency.png" alt="Filament round 2 Fig. 6"><br><sub><b>Fig. 6</b> (in training) Compute footprint on the shared L4: utilisation and memory of all pooled jobs over the first 107 minutes, and seconds per epoch, images per second and peak memory per run. <i>Source: results/loop2/gpu_utilisation.json, results/loop2/runs/*/history.json.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/post1_offline_vs_public.png" alt="Filament round 2 Post 1"><br><sub><b>Post 1</b> CHOOSE PQ of the ten candidates against the human-vs-human median and the 0.55 target, with the two public scores. <i>Source: results/loop2/loop2_candidates.csv.</i></sub></td></tr>
+<tr><td width="50%"><img src="filament-segmentation-2026/figures/loop2/post2_sq_rq.png" alt="Filament round 2 Post 2"><br><sub><b>Post 2</b> SQ against RQ with iso-PQ curves: SQ is flat, the gains are in RQ. <i>Source: results/loop2/loop2_candidates.csv.</i></sub></td>
+<td width="50%"><img src="filament-segmentation-2026/figures/loop2/post5_selection_ladder.png" alt="Filament round 2 Post 5"><br><sub><b>Post 5</b> The same configuration on 16 monitoring records, 80 CHOOSE records and the public test set. <i>Source: results/loop2/loop2_runs.csv, loop2_candidates.csv.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/post3_error_counts.png" alt="Filament round 2 Post 3"><br><sub><b>Post 3</b> True positives, false positives and missed instances per candidate. <i>Source: results/loop2/loop2_candidates.csv.</i></sub></td></tr>
+<tr><td colspan="2" align="center"><img src="filament-segmentation-2026/figures/loop2/post4_ensemble_gain.png" alt="Filament round 2 Post 4"><br><sub><b>Post 4</b> PQ against the number of averaged probability maps. <i>Source: results/loop2/loop2_candidates.csv.</i></sub></td></tr>
+</table>
+
+### Visualizations (filament case, first round)
 
 Six figures read the statistics collected every epoch; five interpret the final metrics. Each caption names the file it comes from.
 
@@ -231,5 +277,8 @@ Following the out-of-sample round, still **untested** here: category-grouped cro
 - Shit, S. et al. *clDice: a Novel Topology-Preserving Loss Function for Tubular Structure Segmentation.* CVPR 2021.
 - Cheng, B., Misra, I., Schwing, A., Kirillov, A., Girdhar, R. *Masked-attention Mask Transformer for Universal Image Segmentation.* CVPR 2022.
 - Ronneberger, O., Fischer, P., Brox, T. *U-Net: Convolutional Networks for Biomedical Image Segmentation.* MICCAI 2015.
+- Iglovikov, V., Shvets, A. *TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation.* arXiv:1801.05746, 2018.
+- He, K., Girshick, R., Dollar, P. *Rethinking ImageNet Pre-training.* ICCV 2019.
+- He, K., Zhang, X., Ren, S., Sun, J. *Deep Residual Learning for Image Recognition.* CVPR 2016.
 - Kirillov, A., He, K., Girshick, R., Rother, C., Dollar, P. *Panoptic Segmentation.* CVPR 2019.
 - Ahmadzadeh, A. et al. *A dataset of manually annotated filaments from H-alpha observations.* Scientific Data, 2024.

@@ -1,8 +1,9 @@
-# Filament segmentation 2026: instance segmentation of thin solar structures, four approaches
+# Filament segmentation 2026: instance segmentation of thin solar structures
 
-Instance segmentation of dark, thin, elongated filaments in 2048 x 2048 full-disk H-alpha images, scored by Panoptic Quality. Three
-small U-Net variants are trained from scratch and one pre-trained Mask2Former is fine-tuned; all four share one pre-processing stage,
-one grouped split, tiled inference and one instance-recovery and scoring code path.
+Instance segmentation of dark, thin, elongated filaments in 2048 x 2048 full-disk H-alpha images, scored by Panoptic Quality. In the
+first round three small U-Net variants are trained from scratch and one pre-trained Mask2Former is fine-tuned; the second round
+(section 12) adds ImageNet-pre-trained ResNet34 U-Nets, hysteresis instance recovery and probability-map ensembles, and submits to the
+platform (best public score **0.33**). All runs share one pre-processing stage, one grouped split, tiled inference and one scoring path.
 Summary, figures and references are in the [repository README](../README.md); this page is the method and the evidence.
 
 ## 1. The task and its metric
@@ -14,8 +15,8 @@ ground truth at IoU > 0.5 and scored by Panoptic Quality,
 
 with SQ the mean IoU of matched pairs and RQ = |TP| / (|TP| + 0.5 |FP| + 0.5 |FN|). The competition's Evaluation and Leaderboard pages
 name PQ as the ranking metric; its Submission File page still says the scoreboard shows a mean Dice score. Which one the scoreboard
-displays could not be established, so PQ is reported together with SQ, RQ and pixel Dice. **No platform score was obtained**
-(no submission was made).
+displays could not be established, so PQ is reported together with SQ, RQ and pixel Dice. Sections 1 to 11 describe the first round,
+which made no submission; the second round (section 12) submitted twice and reports both public scores.
 
 ## 2. What the data look like (`investigate_data.py`, [`results/data_investigation.json`](results/data_investigation.json))
 
@@ -120,6 +121,7 @@ epoch time of every run is 24 to 30 minutes (26.5 for V3); the per-run table in 
 | `test_fil_models.py` | shapes, gradients through the edge branch, soft skeleton, soft-clDice (a swapped definition is caught), loss weights, tiling |
 | `test_fil_m2f.py` | parameter groups, probability combination, loss decreases on a toy batch, empty targets (needs `transformers` and the public checkpoint) |
 | `test_fil_gpu.py` | nvjpeg decode and GPU pre-processing against the CPU reference (needs a CUDA device and the data) |
+| `test_fil_post.py` | second round (9 checks): with default settings the new recovery equals the first-round one; the confidence, hysteresis and area filters on planted objects; averaging identical maps; tile stitching; ResNet34 U-Net shapes; EMA against a hand computation; the false-positive audit |
 
 ## 9. Limitations
 
@@ -142,6 +144,11 @@ epoch time of every run is 24 to 30 minutes (26.5 for V3); the per-run table in 
 | `investigate_data.py`, `analyze_round1.py`, `summarize_runs.py` | data investigation, statistics analysis, result tables |
 | `make_figures_fil.py`, `make_posthoc_figures_fil.py` | the eleven figures |
 | `results/` | run table, first-pass table, per-run training statistics and example crops, data investigation |
+| `fil_pre.py`, `train_fil2.py` | second round: ResNet34 U-Net (with optional edge attention), weight EMA, training of the four new variants |
+| `fil_post.py`, `fil_audit.py` | second round: hysteresis and confidence-filtered instance recovery, map averaging, false-positive audit |
+| `predict_choose.py`, `score_fixed.py`, `submit_best.py` | second round: CHOOSE probability maps, fixed-setting scoring of candidates, test-set submission |
+| `make_figures_fil2_pub.py`, `make_posthoc_figures_fil2_pub.py` | second round: six in-training and five post-training figures |
+| `results/loop2/` | second round: per-run statistics, run and candidate tables, GPU utilisation samples, submission record |
 
 ## 11. Reproduce
 
@@ -158,3 +165,126 @@ python3 summarize_runs.py && python3 make_figures_fil.py && python3 make_posthoc
 ```
 
 The tables and figures in this folder are regenerated from `results/runs/` by the last line without any data.
+
+## 12. Second round: pre-trained encoders, ensembles and two platform scores
+
+### 12.1 What changed and why
+
+The first round left three facts: false positives dominated (about one extra instance per true one), the U-Nets were under-fitted
+(training Dice 0.70, loss still falling), and the pre-trained Mask2Former reached the U-Nets' level after 9 epochs. The second round
+therefore changes the initialisation, the instance recovery and the way models are combined, and keeps the split, the pre-processing and
+the scoring code of the first round unchanged.
+
+| Variant | Model | Training |
+|---|---|---|
+| `r34` | U-Net with an ImageNet ResNet34 encoder (first-layer filters summed to one grey channel), transposed-conv decoder with GroupNorm, a last block at full resolution that also sees the input; 24.4 M parameters | BCE + soft Dice, Adam 3e-4 (encoder 0.33x), batch 8, 512 crops, EMA of weights (0.995) |
+| `r34e` | `r34` + the two edge-guided attention blocks of V2 at the 1/32 bottleneck; 26.5 M | as `r34` |
+| `r34c` | `r34` trained on the soft consensus (mean) of the annotator copies of each image | as `r34` |
+| `m2fx` | the first-round Mask2Former checkpoint, continued | its own loss, batch 4 |
+
+The encoder transfer follows TernausNet (Iglovikov and Shvets, 2018); the lower encoder rate follows the fine-tuning guidance of He et
+al. (2019). Seed 0 of the three ResNet34 variants ran two cosine cycles at 3e-4 (about 12 and 30 epochs), then was resumed at 2e-4 with a
+third cosine cycle over 80 epochs and early stopping (patience 6 evaluations of the smoothed criterion, one evaluation every 3 epochs on
+the 16-record monitoring subset), with no wall-clock limit.
+
+**Instance recovery** (`fil_post.instances_post`): hysteresis (a component of `p > lo` survives only if it contains a pixel with
+`p > hi`), then removal of components below `min_area` pixels or below `min_conf` mean probability. One setting was fixed for every
+candidate and **not searched**: `hi 0.4, lo 0.2, min_conf 0.8, min_area 200`, no closing.
+
+**Ensembles** average the probability maps of several runs before instance recovery. Candidates were scored on 80 CHOOSE records
+(`score_fixed.py`); REPORT was still never read.
+
+### 12.2 Training results (16-record monitoring subset)
+
+[`results/loop2/loop2_runs.csv`](results/loop2/loop2_runs.csv)
+
+| Run | Epochs | Best epoch | Best smoothed PQ | Median s / epoch (shared L4) | Peak memory |
+|---|---|---|---|---|---|
+| `r34_s0` | 80 | 75 | **0.409** | 57 | 5.6 GiB |
+| `r34e_s0` | 69 (early stop) | 51 | 0.389 | 68 | 5.8 GiB |
+| `r34c_s0` | 79 | 69 | 0.381 | 57 | 5.6 GiB |
+| `r34e_s1` | 35 (stopped) | 24 | 0.375 | 75 | 5.0 GiB |
+| `m2fx_s0` | 2 | 2 | 0.321 | 296 | 6.3 GiB |
+
+With a pre-trained encoder and longer training (the two are not separated) the best monitoring PQ rises from 0.33 to 0.36
+(first-round U-Nets) to 0.375 to 0.409. The consensus target
+(`r34c`) and the edge attention (`r34e`) did not beat the plain `r34` in their single comparable seed. Continuing Mask2Former got only
+2 epochs before the round was stopped.
+
+### 12.3 Candidates on 80 CHOOSE records and the public scores
+
+[`results/loop2/loop2_candidates.csv`](results/loop2/loop2_candidates.csv); one fixed instance setting for all rows.
+
+| Candidate | Models averaged | PQ | SQ | RQ | TP / FP / FN | Public score |
+|---|---|---|---|---|---|---|
+| V0 x3 + `r34_s0` best | 4 | **0.431** | 0.669 | 0.635 | 427 / 266 / 233 | not submitted |
+| V0 x3 + `r34e_s0` (epoch 51) | 4 | 0.427 | 0.665 | 0.632 | 424 / 237 / 236 | **0.33** |
+| V0 x3 + `r34`, `r34e`, `r34c` | 6 | 0.424 | 0.660 | 0.624 | 425 / 247 / 235 | |
+| `r34`, `r34e`, `r34c` | 3 | 0.417 | 0.667 | 0.615 | 431 / 271 / 229 | |
+| V0 x3 (first round) | 3 | 0.412 | 0.669 | 0.611 | 441 / 309 / 219 | |
+| `r34e_s0` (epoch 51) | 1 | 0.395 | 0.671 | 0.587 | 457 / 409 / 203 | |
+| `r34c_s0` | 1 | 0.387 | 0.671 | 0.572 | 457 / 456 / 203 | |
+| V0 seed 0 (first round) | 1 | 0.387 | 0.668 | 0.577 | 459 / 439 / 201 | |
+| `r34_s0` (last epoch) | 1 | 0.385 | 0.670 | 0.570 | 461 / 463 / 199 | |
+| `r34_s0` best (epoch 75) | 1 | 0.385 | 0.675 | 0.565 | 466 / 494 / 194 | **0.31** |
+
+![Public scores of the two submissions](figures/loop2/kaggle_public_scores.png)
+
+How to read it:
+- **Averaging is the largest gain:** +0.03 to +0.05 PQ over any single model, almost all of it in RQ. False positives fall from 410 to
+  490 to 240 to 310, at a cost of 20 to 40 true positives (Post 3). SQ stays at 0.66 to 0.68 throughout (Post 2).
+- **On 80 records the single models are within 0.01 of each other** (0.385 to 0.395), although the 16-record monitoring subset had
+  ranked `r34` clearly first. The pre-trained encoder helps mostly as a member of an ensemble with the first-round models.
+- **The public scores are 0.10 below CHOOSE** for the ensemble (0.427 to 0.33) and 0.08 for the single model (0.385 to 0.31); the
+  ensemble's advantage of about 0.04 survives on the public set as 0.02 (Post 5). Possible reasons, none of them tested: the candidate
+  was the best of eight on the same 80 records (selection optimism), the public test images or their annotators differ from CHOOSE,
+  and the platform's scoring rule may differ in detail from the local PQ. The public score is computed on part of the test set and shown
+  to two decimals.
+- **The 0.55 target is not reached.** The best public score is 0.33; the best offline PQ (0.431) is above the human-vs-human median
+  (0.359) but far from 0.55.
+
+### 12.4 Figures
+
+Six in-training figures ([`make_figures_fil2_pub.py`](make_figures_fil2_pub.py), from `results/loop2/runs/*/history.json` and
+`results/loop2/gpu_utilisation.json`) and five post-training figures ([`make_posthoc_figures_fil2_pub.py`](make_posthoc_figures_fil2_pub.py),
+from the two tables), embedded in the [repository README](../README.md#filament-segmentation-2026). The in-training figures use seed 0 of
+each variant; `r34e_s1` is left out because its 35 epochs would cut the seed mean short. The example crops of the first round's Fig. 6
+were not kept for this round, so Fig. 6 shows the GPU footprint instead.
+
+### 12.5 Limitation: small-scale training on one L4
+
+Everything in this folder was trained on **one NVIDIA L4 (24 GB, 22.5 GiB usable), shared by up to six jobs at once**. That budget,
+not the method, set most of the design:
+
+- **Model and input size.** ResNet34 is the largest encoder trained; crops are 512 x 512 from 2048 x 2048 images, batch 8, so a model
+  never sees a whole filament system or the full disk at once. Larger encoders, larger crops or full-resolution context were not tried.
+- **Seeds and schedules.** One seed per variant in the comparison (a second `r34e` seed was stopped at 35 epochs), so differences of
+  0.01 between single models are not resolved. A ResNet34 epoch takes about 57 to 68 s when shared (12 to 14 images per second), so an
+  80-epoch run costs about 1.4 hours.
+- **Mask2Former was starved.** At 296 s per epoch when shared, and restarted at batch 4 after an out-of-memory failure on the shared
+  card, it received 9 + 2 epochs in total.
+- **Memory headroom.** The pooled jobs peaked at 22.0 of 22.5 GiB (Fig. 6); jobs were started while their measured memory fitted, and
+  one over-start had to be cut back.
+- **No search.** Instance parameters were fixed, not tuned; no test-time augmentation was used, and only two submissions were made.
+- The utilisation samples cover the first 107 minutes of pooled training (mean 89%, 89% of samples at or above 85%); the resumed
+  training afterwards was not sampled.
+
+Whether more compute would close the gap to 0.55 is **untested**; the annotator agreement (median PQ 0.36 between two copies of one
+image) suggests that label noise, not only model size, bounds the score.
+
+### 12.6 Reproduce the second round
+
+```bash
+python3 tests/test_fil_post.py                                                 # 9 checks, CPU, no data
+python3 train_fil2.py --variant r34 --seed 0 --prep prep --out runs           # also r34e, r34c; m2fx with --init-from runs/v3_s0/best.pt
+python3 train_fil2.py --variant r34 --seed 0 --prep prep --out runs --resume --cosine-offset 44 --cosine-epochs 80 --patience 6
+python3 predict_choose.py --runs runs/v0_s0 runs/v0_s1 runs/v0_s2 runs/r34e_s0 --prep prep --out probs
+python3 score_fixed.py --prep prep --files probs/files.json --params '{"hi":0.4,"lo":0.2,"min_conf":0.8,"min_area":200,"close_radius":0}' \
+    --src ens=probs/v0_s0.npy,probs/v0_s1.npy,probs/v0_s2.npy,probs/r34e_s0.npy
+python3 submit_best.py --runs runs/v0_s0 runs/v0_s1 runs/v0_s2 runs/r34e_s0 --prep prep \
+    --params '{"hi":0.4,"lo":0.2,"min_conf":0.8,"min_area":200,"close_radius":0}' --out submission.csv
+python3 make_figures_fil2_pub.py --runs results/loop2/runs --gpu results/loop2/gpu_utilisation.json --out figures/loop2
+python3 make_posthoc_figures_fil2_pub.py --results results/loop2 --out figures/loop2
+```
+
+The last two lines redraw the eleven second-round figures from `results/loop2/` without any data or GPU.
